@@ -44,7 +44,7 @@ public final class SensorServiceImpl implements SensorService {
                         }
                         sensor.setPlotId(Long.valueOf(scanner.next().replaceAll("\"", "")));
                         sensor.setLocation(scanner.next().replaceAll("\"", ""));
-                        sensor.setTypeOfSensor(SensorType.valueOf(scanner.next().replaceAll("\"", "")));
+                        sensor.setTypeOfSensor(SensorType.valueOf(scanner.next().replaceAll("\"", "").trim()));
                         PLOT_HASH_MAP.put(sensor.getSensorId(), sensor);
                     }
                 } catch (IOException e) {
