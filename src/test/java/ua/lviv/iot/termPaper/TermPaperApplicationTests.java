@@ -131,7 +131,7 @@ class TermPaperApplicationTests {
         System.out.println(localDateTime);
         SoftAssertions softAssertions = new SoftAssertions();
         softAssertions.assertThat(Files.exists(path)).isTrue();
-        softAssertions.assertThat(Files.readString(path).contains("\"7\",\"4\",\""+localDateTime+"\",\"120.0\"")).isTrue();
+        softAssertions.assertThat(Files.readString(path).contains("\"7\",\"4\",\"" + localDateTime + "\",\"120.0\"")).isTrue();
         CsvManager.deleteFromFile(id, "sensorReading");
         softAssertions.assertAll();
     }

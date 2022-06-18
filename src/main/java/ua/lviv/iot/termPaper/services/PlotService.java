@@ -1,10 +1,12 @@
 package ua.lviv.iot.termPaper.services;
 
+import org.springframework.stereotype.Service;
 import ua.lviv.iot.termPaper.models.Plot;
 
 import java.io.IOException;
 import java.util.List;
 
+@Service
 public interface PlotService {
     /**
      * Створює нову ділянку.

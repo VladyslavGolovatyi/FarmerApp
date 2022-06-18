@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 @Service
 public final class SensorReadingServiceImpl implements SensorReadingService {
 
-    // Сховище ділянок
-    private static final Map<Long, SensorReading> PLOT_HASH_MAP = new HashMap<>();
+    // Сховище показів
+    private static final Map<Long, SensorReading> SENSOR_READING_HASH_MAP = new HashMap<>();
 
-    // Змінна для генерації ID ділянки
+    // Змінна для генерації ID показу
     private static AtomicInteger sensorReadingIdHolder = new AtomicInteger();
 
     public static void init() {
@@ -46,7 +46,7 @@ public final class SensorReadingServiceImpl implements SensorReadingService {
                         sensorReading.setSensorId(Long.valueOf(scanner.next().replaceAll("\"", "")));
                         sensorReading.setDateTime(LocalDateTime.parse(scanner.next().replaceAll("\"", "")));
                         sensorReading.setReading(Double.parseDouble(scanner.next().replaceAll("\"", "")));
-                        PLOT_HASH_MAP.put(sensorReading.getSensorReadingId(), sensorReading);
+                        SENSOR_READING_HASH_MAP.put(sensorReading.getSensorReadingId(), sensorReading);
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -60,23 +60,23 @@ public final class SensorReadingServiceImpl implements SensorReadingService {
         final int sensorReadingId = sensorReadingIdHolder.incrementAndGet();
         sensorReading.setSensorReadingId((long) sensorReadingId);
         sensorReading.setDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-        PLOT_HASH_MAP.put((long) sensorReadingId, sensorReading);
+        SENSOR_READING_HASH_MAP.put((long) sensorReadingId, sensorReading);
         CsvManager.writeToFile(sensorReading.receiveHeaders(), sensorReading.toCsv(), "sensorReading");
     }
 
     @Override
     public List<SensorReading> readAll() {
-        return PLOT_HASH_MAP.values().stream().toList();
+        return SENSOR_READING_HASH_MAP.values().stream().toList();
     }
 
     @Override
     public SensorReading read(final long id) {
-        return PLOT_HASH_MAP.get(id);
+        return SENSOR_READING_HASH_MAP.get(id);
     }
 
     @Override
     public List<SensorReading> readAllSensorsSensorReadings(final long id) {
-        return PLOT_HASH_MAP.values().stream().filter(sensorReading -> sensorReading.getSensorId() == id).collect(Collectors.toList());
+        return SENSOR_READING_HASH_MAP.values().stream().filter(sensorReading -> sensorReading.getSensorId() == id).collect(Collectors.toList());
     }
 
     @Override
@@ -84,8 +84,8 @@ public final class SensorReadingServiceImpl implements SensorReadingService {
         CsvManager.deleteFromFile(id, "sensorReading");
         sensorReading.setSensorReadingId(id);
         CsvManager.writeToFile(sensorReading.receiveHeaders(), sensorReading.toCsv(), "sensorReading");
-        if (PLOT_HASH_MAP.containsKey(id)) {
-            PLOT_HASH_MAP.put(id, sensorReading);
+        if (SENSOR_READING_HASH_MAP.containsKey(id)) {
+            SENSOR_READING_HASH_MAP.put(id, sensorReading);
             return true;
         }
 
@@ -95,6 +95,6 @@ public final class SensorReadingServiceImpl implements SensorReadingService {
     @Override
     public boolean delete(final long id) {
         CsvManager.deleteFromFile(id, "sensorReading");
-        return PLOT_HASH_MAP.remove(id) != null;
+        return SENSOR_READING_HASH_MAP.remove(id) != null;
     }
 }

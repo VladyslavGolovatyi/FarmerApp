@@ -18,7 +18,6 @@ public final class FarmerController {
 
     @Autowired
     public FarmerController() {
-        System.out.println("FarmerController created");
         this.farmerService = new FarmerServiceImpl();
     }
 

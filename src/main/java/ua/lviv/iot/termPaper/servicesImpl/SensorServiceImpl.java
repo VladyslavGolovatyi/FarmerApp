@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 @Service
 public final class SensorServiceImpl implements SensorService {
 
-    // Сховище ділянок
-    private static final Map<Long, Sensor> PLOT_HASH_MAP = new HashMap<>();
+    // Сховище сенсорів
+    private static final Map<Long, Sensor> SENSOR_HASH_MAP = new HashMap<>();
 
-    // Змінна для генерації ID ділянки
+    // Змінна для генерації ID сенсора
     private static AtomicInteger sensorIdHolder = new AtomicInteger();
 
     public static void init() {
@@ -45,7 +45,7 @@ public final class SensorServiceImpl implements SensorService {
                         sensor.setPlotId(Long.valueOf(scanner.next().replaceAll("\"", "")));
                         sensor.setLocation(scanner.next().replaceAll("\"", ""));
                         sensor.setTypeOfSensor(SensorType.valueOf(scanner.next().replaceAll("\"", "").trim()));
-                        PLOT_HASH_MAP.put(sensor.getSensorId(), sensor);
+                        SENSOR_HASH_MAP.put(sensor.getSensorId(), sensor);
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -58,23 +58,23 @@ public final class SensorServiceImpl implements SensorService {
     public void create(final Sensor sensor) throws IOException {
         final int sensorId = sensorIdHolder.incrementAndGet();
         sensor.setSensorId((long) sensorId);
-        PLOT_HASH_MAP.put((long) sensorId, sensor);
+        SENSOR_HASH_MAP.put((long) sensorId, sensor);
         CsvManager.writeToFile(sensor.receiveHeaders(), sensor.toCsv(), "sensor");
     }
 
     @Override
     public List<Sensor> readAll() {
-        return PLOT_HASH_MAP.values().stream().toList();
+        return SENSOR_HASH_MAP.values().stream().toList();
     }
 
     @Override
     public Sensor read(final long id) {
-        return PLOT_HASH_MAP.get(id);
+        return SENSOR_HASH_MAP.get(id);
     }
 
     @Override
     public List<Sensor> readAllPlotsSensors(final long id) {
-        return PLOT_HASH_MAP.values().stream().filter(sensor -> sensor.getPlotId() == id).collect(Collectors.toList());
+        return SENSOR_HASH_MAP.values().stream().filter(sensor -> sensor.getPlotId() == id).collect(Collectors.toList());
     }
 
     @Override
@@ -82,8 +82,8 @@ public final class SensorServiceImpl implements SensorService {
         CsvManager.deleteFromFile(id, "sensor");
         sensor.setSensorId(id);
         CsvManager.writeToFile(sensor.receiveHeaders(), sensor.toCsv(), "sensor");
-        if (PLOT_HASH_MAP.containsKey(id)) {
-            PLOT_HASH_MAP.put(id, sensor);
+        if (SENSOR_HASH_MAP.containsKey(id)) {
+            SENSOR_HASH_MAP.put(id, sensor);
             return true;
         }
 
@@ -93,6 +93,6 @@ public final class SensorServiceImpl implements SensorService {
     @Override
     public boolean delete(final long id) {
         CsvManager.deleteFromFile(id, "sensor");
-        return PLOT_HASH_MAP.remove(id) != null;
+        return SENSOR_HASH_MAP.remove(id) != null;
     }
 }
