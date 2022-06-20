@@ -1,5 +1,6 @@
 package ua.lviv.iot.termPaper.models;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Setter
 @Entity
+@EqualsAndHashCode
 public class SensorReading {
     @Id
     @GeneratedValue

@@ -1,5 +1,6 @@
 package ua.lviv.iot.termPaper.models;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import javax.persistence.Id;
 @Getter
 @Setter
 @Entity
+@EqualsAndHashCode
 public final class Plot {
 
     private @Id
