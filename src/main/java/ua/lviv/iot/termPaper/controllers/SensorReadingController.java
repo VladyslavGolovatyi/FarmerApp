@@ -14,18 +14,12 @@ import java.util.List;
 @RestController
 public final class SensorReadingController {
 
-    private final SensorReadingService sensorReadingService;
-
     @Autowired
-    public SensorReadingController() {
-        this.sensorReadingService = new SensorReadingServiceImpl();
-    }
+    private SensorReadingServiceImpl sensorReadingService;
 
     @PostMapping(value = "/sensorReadings")
-    public ResponseEntity<?> create(@RequestBody final List<SensorReading> sensorReadings) throws IOException {
-        for (SensorReading sensorReading : sensorReadings) {
-            sensorReadingService.create(sensorReading);
-        }
+    public ResponseEntity<?> create(@RequestBody final SensorReading sensorReading) throws IOException {
+        sensorReadingService.create(sensorReading);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -42,7 +36,7 @@ public final class SensorReadingController {
     public ResponseEntity<List<SensorReading>> readAll() {
         final List<SensorReading> sensorReadings = sensorReadingService.readAll();
 
-        return sensorReadings != null && !sensorReadings.isEmpty()
+        return !sensorReadings.isEmpty()
                 ? new ResponseEntity<>(sensorReadings, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

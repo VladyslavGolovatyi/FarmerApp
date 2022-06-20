@@ -14,18 +14,12 @@ import java.util.List;
 @RestController
 public final class PlotController {
 
-    private final PlotService plotService;
-
     @Autowired
-    public PlotController() {
-        this.plotService = new PlotServiceImpl();
-    }
+    private PlotServiceImpl plotService;
 
     @PostMapping(value = "/plots")
-    public ResponseEntity<?> create(@RequestBody final List<Plot> plots) throws IOException {
-        for (Plot plot : plots) {
-            plotService.create(plot);
-        }
+    public ResponseEntity<?> create(@RequestBody final Plot plot) throws IOException {
+        plotService.create(plot);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -42,7 +36,7 @@ public final class PlotController {
     public ResponseEntity<List<Plot>> readAll() {
         final List<Plot> plots = plotService.readAll();
 
-        return plots != null && !plots.isEmpty()
+        return !plots.isEmpty()
                 ? new ResponseEntity<>(plots, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

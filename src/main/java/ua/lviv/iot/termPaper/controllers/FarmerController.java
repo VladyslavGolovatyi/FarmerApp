@@ -14,18 +14,12 @@ import java.util.List;
 @RestController
 public final class FarmerController {
 
-    private final FarmerService farmerService;
-
     @Autowired
-    public FarmerController() {
-        this.farmerService = new FarmerServiceImpl();
-    }
+    private FarmerServiceImpl farmerService;
 
     @PostMapping(value = "/farmers")
-    public ResponseEntity<?> create(@RequestBody final List<Farmer> farmers) throws IOException {
-        for (Farmer farmer:farmers) {
-            farmerService.create(farmer);
-        }
+    public ResponseEntity<?> create(@RequestBody final Farmer farmer) throws IOException {
+        farmerService.create(farmer);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -33,7 +27,7 @@ public final class FarmerController {
     public ResponseEntity<List<Farmer>> read() {
         final List<Farmer> farmers = farmerService.readAll();
 
-        return farmers != null && !farmers.isEmpty()
+        return !farmers.isEmpty()
                 ? new ResponseEntity<>(farmers, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
