@@ -12,10 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -26,15 +23,14 @@ public final class SensorReadingServiceImpl implements SensorReadingService {
     private static final Map<Long, SensorReading> SENSOR_READING_HASH_MAP = new HashMap<>();
 
     // Змінна для генерації ID показу
-    private static AtomicInteger sensorReadingIdHolder = new AtomicInteger();
+    public static AtomicInteger sensorReadingIdHolder = new AtomicInteger();
 
     public static void init() {
         final int maxNumberOfDaysInMonth = 31;
         for (int i = 1; i <= maxNumberOfDaysInMonth; ++i) {
-            Path path = Path.of("sensorReading-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
+            Path path = Path.of("csvFiles/sensorReading-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
             if (Files.exists(path)) {
-                try {
-                    Scanner scanner = new Scanner(path);
+                try (Scanner scanner = new Scanner(path)) {
                     scanner.useDelimiter(",|\\n");
                     scanner.nextLine();
                     while (scanner.hasNext()) {
@@ -66,7 +62,7 @@ public final class SensorReadingServiceImpl implements SensorReadingService {
 
     @Override
     public List<SensorReading> readAll() {
-        return SENSOR_READING_HASH_MAP.values().stream().toList();
+        return new ArrayList<>(SENSOR_READING_HASH_MAP.values());
     }
 
     @Override

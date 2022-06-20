@@ -11,10 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -25,15 +22,14 @@ public final class SensorServiceImpl implements SensorService {
     private static final Map<Long, Sensor> SENSOR_HASH_MAP = new HashMap<>();
 
     // Змінна для генерації ID сенсора
-    private static AtomicInteger sensorIdHolder = new AtomicInteger();
+    public static AtomicInteger sensorIdHolder = new AtomicInteger();
 
     public static void init() {
         final int maxNumberOfDaysInMonth = 31;
         for (int i = 1; i <= maxNumberOfDaysInMonth; ++i) {
-            Path path = Path.of("sensor-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
+            Path path = Path.of("csvFiles/sensor-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
             if (Files.exists(path)) {
-                try {
-                    Scanner scanner = new Scanner(path);
+                try (Scanner scanner = new Scanner(path)) {
                     scanner.useDelimiter(",|\\n");
                     scanner.nextLine();
                     while (scanner.hasNext()) {
@@ -43,7 +39,7 @@ public final class SensorServiceImpl implements SensorService {
                             sensorIdHolder = new AtomicInteger(Math.toIntExact(sensor.getSensorId()));
                         }
                         sensor.setPlotId(Long.valueOf(scanner.next().replaceAll("\"", "")));
-                        sensor.setLocation(scanner.next().replaceAll("\"", ""));
+                        sensor.setLocation(scanner.next().replaceAll("\"", "").replaceAll("\r",""));
                         sensor.setTypeOfSensor(SensorType.valueOf(scanner.next().replaceAll("\"", "").trim()));
                         SENSOR_HASH_MAP.put(sensor.getSensorId(), sensor);
                     }
@@ -64,7 +60,7 @@ public final class SensorServiceImpl implements SensorService {
 
     @Override
     public List<Sensor> readAll() {
-        return SENSOR_HASH_MAP.values().stream().toList();
+        return new ArrayList<>(SENSOR_HASH_MAP.values());
     }
 
     @Override

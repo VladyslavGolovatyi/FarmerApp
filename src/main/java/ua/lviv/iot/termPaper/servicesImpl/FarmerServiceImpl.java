@@ -20,15 +20,14 @@ public final class FarmerServiceImpl implements FarmerService {
     private static final Map<Long, Farmer> FARMER_HASH_MAP = new HashMap<>();
 
     // Змінна для генерації ID фермера
-    private static AtomicInteger farmerIdHolder = new AtomicInteger();
+    public static AtomicInteger farmerIdHolder = new AtomicInteger();
 
     public static void init() {
         final int maxNumberOfDaysInMonth = 31;
         for (int i = 1; i <= maxNumberOfDaysInMonth; ++i) {
-            Path path = Path.of("farmer-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
+            Path path = Path.of("csvFiles/farmer-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
             if (Files.exists(path)) {
-                try {
-                    Scanner scanner = new Scanner(path);
+                try (Scanner scanner = new Scanner(path)) {
                     scanner.useDelimiter(",|\\n");
                     scanner.nextLine();
                     while (scanner.hasNext()) {
@@ -37,7 +36,7 @@ public final class FarmerServiceImpl implements FarmerService {
                         if (farmer.getFarmerId() > farmerIdHolder.get()) {
                             farmerIdHolder = new AtomicInteger(Math.toIntExact(farmer.getFarmerId()));
                         }
-                        farmer.setFullName(scanner.next().replaceAll("\"", ""));
+                        farmer.setFullName(scanner.next().replaceAll("\"", "").replaceAll("\r",""));
                         FARMER_HASH_MAP.put(farmer.getFarmerId(), farmer);
                     }
                 } catch (IOException e) {
