@@ -1,5 +1,6 @@
 package ua.lviv.iot.termPaper;
 
+import com.opencsv.CSVWriter;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,10 @@ import ua.lviv.iot.termPaper.servicesImpl.PlotServiceImpl;
 import ua.lviv.iot.termPaper.servicesImpl.SensorReadingServiceImpl;
 import ua.lviv.iot.termPaper.servicesImpl.SensorServiceImpl;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -24,7 +28,7 @@ class TermPaperApplicationTests {
 
     @Test
     void testWriteToCsvOneElementCase() throws IOException {
-        Path path = Path.of("user-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv");
+        Path path = Path.of("csvFiles/user-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv");
         if (Files.exists(path))
             Files.delete(path);
         CsvManager.writeToFile(new String[]{"name", "surname"}, new String[]{"David", "Johns"}, "user");
@@ -37,7 +41,7 @@ class TermPaperApplicationTests {
 
     @Test
     void testWriteToCsvRegularCase() throws IOException {
-        Path path = Path.of("user-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv");
+        Path path = Path.of("csvFiles/user-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv");
         if (Files.exists(path))
             Files.delete(path);
         CsvManager.writeToFile(new String[]{"name", "surname"}, new String[]{"David", "Johns"}, "user");
@@ -53,18 +57,28 @@ class TermPaperApplicationTests {
     @Test
     void testReadFarmerFromCsv() throws IOException {
         FarmerServiceImpl.init();
-        Path path = Path.of("farmer-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv");
-        Farmer farmer = new Farmer();
-        final long id = 77L;
-        farmer.setFarmerId(id);
-        farmer.setFullName("Petrov Ivan");
-        CsvManager.writeToFile(farmer.receiveHeaders(), farmer.toCsv(), "farmer");
+        String path = "csvFiles/farmer-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
+        long id = FarmerServiceImpl.farmerIdHolder.get() + 1;
+        if(Files.exists(Path.of(path))){
+            FileWriter writer = new FileWriter(path, StandardCharsets.UTF_8, true);
+            writer.write("\""+id+"\",\"Surname Name\"");
+            writer.close();
+        }
+        else{
+            File file = new File(path);
+            FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
+            writer.write("\"farmerId\",\"fullName\"\n");
+            writer.write("\""+id+"\",\"Surname Name\"");
+            writer.close();
+        }
+        FarmerServiceImpl.init();
 
         SoftAssertions softAssertions = new SoftAssertions();
-        softAssertions.assertThat(Files.exists(path)).isTrue();
-        softAssertions.assertThat(Files.readString(path).contains("""
-                "77","Petrov Ivan"
-                """)).isTrue();
+        FarmerServiceImpl farmerService = new FarmerServiceImpl();
+        Farmer farmer = new Farmer();
+        farmer.setFarmerId(id);
+        farmer.setFullName("Surname Name");
+        softAssertions.assertThat(farmerService.read(id).equals(farmer)).isTrue();
         CsvManager.deleteFromFile(id, "farmer");
         softAssertions.assertAll();
     }
@@ -72,22 +86,30 @@ class TermPaperApplicationTests {
     @Test
     void testReadPlotFromCsv() throws IOException {
         PlotServiceImpl.init();
-        Path path = Path.of("plot-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv");
-        Plot plot = new Plot();
-        final long id = 50L;
-        final long id1 = 60L;
-        final double area = 500;
-        plot.setPlotId(id);
-        plot.setFarmerId(id1);
-        plot.setArea(area);
-        plot.setLocation("Lviv");
-        CsvManager.writeToFile(plot.receiveHeaders(), plot.toCsv(), "plot");
+        String path = "csvFiles/plot-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
+        long id = PlotServiceImpl.plotIdHolder.get() + 1;
+        if(Files.exists(Path.of(path))){
+            FileWriter writer = new FileWriter(path, StandardCharsets.UTF_8, true);
+            writer.write("\""+id+"\",\"1\",\"300.0\",\"Location\"");
+            writer.close();
+        }
+        else{
+            File file = new File(path);
+            FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
+            writer.write("\"plotId\",\"farmerId\",\"area\",\"location\"\n");
+            writer.write("\""+id+"\",\"1\",\"300.0\",\"Location\"");
+            writer.close();
+        }
+        PlotServiceImpl.init();
 
         SoftAssertions softAssertions = new SoftAssertions();
-        softAssertions.assertThat(Files.exists(path)).isTrue();
-        softAssertions.assertThat(Files.readString(path).contains("""
-                "50","60","500.0","Lviv"
-                """)).isTrue();
+        PlotServiceImpl plotService = new PlotServiceImpl();
+        Plot plot = new Plot();
+        plot.setPlotId(id);
+        plot.setArea(300);
+        plot.setLocation("Location");
+        plot.setFarmerId(1L);
+        softAssertions.assertThat(plotService.read(id).equals(plot)).isTrue();
         CsvManager.deleteFromFile(id, "plot");
         softAssertions.assertAll();
     }
@@ -95,20 +117,30 @@ class TermPaperApplicationTests {
     @Test
     void testReadSensorFromCsv() throws IOException {
         SensorServiceImpl.init();
-        Path path = Path.of("sensor-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv");
-        Sensor sensor = new Sensor();
-        final long id = 77L;
-        sensor.setSensorId(id);
-        sensor.setPlotId(id);
-        sensor.setLocation("Kyiv");
-        sensor.setTypeOfSensor(SensorType.LIGHT);
-        CsvManager.writeToFile(sensor.receiveHeaders(), sensor.toCsv(), "sensor");
+        String path = "csvFiles/sensor-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
+        long id = SensorServiceImpl.sensorIdHolder.get() + 1;
+        if(Files.exists(Path.of(path))){
+            FileWriter writer = new FileWriter(path, StandardCharsets.UTF_8, true);
+            writer.write("\""+id+"\",\"1\",\"Location\",\"LIGHT\"");
+            writer.close();
+        }
+        else{
+            File file = new File(path);
+            FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
+            writer.write("\"sensorId\",\"plotId\",\"location\",\"typeOfSensor\"\n");
+            writer.write("\""+id+"\",\"1\",\"Location\",\"LIGHT\"");
+            writer.close();
+        }
+        SensorServiceImpl.init();
 
         SoftAssertions softAssertions = new SoftAssertions();
-        softAssertions.assertThat(Files.exists(path)).isTrue();
-        softAssertions.assertThat(Files.readString(path).contains("""
-                "77","77","Kyiv","LIGHT"
-                """)).isTrue();
+        SensorServiceImpl sensorService = new SensorServiceImpl();
+        Sensor sensor = new Sensor();
+        sensor.setSensorId(id);
+        sensor.setPlotId(1L);
+        sensor.setTypeOfSensor(SensorType.LIGHT);
+        sensor.setLocation("Location");
+        softAssertions.assertThat(sensorService.read(id).equals(sensor)).isTrue();
         CsvManager.deleteFromFile(id, "sensor");
         softAssertions.assertAll();
     }
@@ -116,22 +148,31 @@ class TermPaperApplicationTests {
     @Test
     void testReadSensorReadingFromCsv() throws IOException {
         SensorReadingServiceImpl.init();
-        Path path = Path.of("sensorReading-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv");
-        SensorReading sensorReading = new SensorReading();
-        final long id = 7L;
-        final long id1 = 4L;
-        final double reading = 120;
-        final LocalDateTime localDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        sensorReading.setSensorReadingId(id);
-        sensorReading.setSensorId(id1);
-        sensorReading.setDateTime(localDateTime);
-        sensorReading.setReading(reading);
-        CsvManager.writeToFile(sensorReading.receiveHeaders(), sensorReading.toCsv(), "sensorReading");
+        String path = "csvFiles/sensorReading-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
+        long id = SensorReadingServiceImpl.sensorReadingIdHolder.get() + 1;
+        LocalDateTime localDateTime = LocalDateTime.now();
+        if(Files.exists(Path.of(path))){
+            FileWriter writer = new FileWriter(path, StandardCharsets.UTF_8, true);
+            writer.write("\""+id+"\",\"1\",\""+localDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)+"\",\"90.0\"");
+            writer.close();
+        }
+        else{
+            File file = new File(path);
+            FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8);
+            writer.write("\"sensorReadingId\",\"sensorId\",\"dateTime\",\"reading\"\n");
+            writer.write("\""+id+"\",\"1\",\"Location\",\"LIGHT\"");
+            writer.close();
+        }
+        SensorReadingServiceImpl.init();
 
-        System.out.println(localDateTime);
         SoftAssertions softAssertions = new SoftAssertions();
-        softAssertions.assertThat(Files.exists(path)).isTrue();
-        softAssertions.assertThat(Files.readString(path).contains("\"7\",\"4\",\"" + localDateTime + "\",\"120.0\"")).isTrue();
+        SensorReadingServiceImpl sensorReadingService = new SensorReadingServiceImpl();
+        SensorReading sensorReading = new SensorReading();
+        sensorReading.setSensorReadingId(id);
+        sensorReading.setReading(90);
+        sensorReading.setSensorId(1L);
+        sensorReading.setDateTime(localDateTime);
+        softAssertions.assertThat(sensorReadingService.read(id).equals(sensorReading)).isTrue();
         CsvManager.deleteFromFile(id, "sensorReading");
         softAssertions.assertAll();
     }
