@@ -1,12 +1,10 @@
 package ua.lviv.iot.termPaper.services;
 
-import org.springframework.stereotype.Service;
 import ua.lviv.iot.termPaper.models.SensorReading;
 
 import java.io.IOException;
 import java.util.List;
 
-@Service
 public interface SensorReadingService {
 
     /**
@@ -18,20 +16,23 @@ public interface SensorReadingService {
 
     /**
      * Повертає список всіх показів.
+     *
      * @return список показів
      */
     List<SensorReading> readAll();
 
     /**
      * Повертає показ з певним id.
-     * @param id   id показу
+     *
+     * @param id id показу
      * @return показ
      */
     SensorReading read(long id);
 
     /**
      * Повертає список всіх показів сенсора.
-     * @param id   id сенсора
+     *
+     * @param id id сенсора
      * @return список показів
      */
     List<SensorReading> readAllSensorsSensorReadings(long id);
@@ -40,7 +41,7 @@ public interface SensorReadingService {
      * Оновляє показ з заданим ID.
      *
      * @param sensorReading показ, згідно з яким потрібно оновити дані
-     * @param id   id показу який потрібно оновити
+     * @param id            id показу який потрібно оновити
      * @return true якщо дані були оновлені, інакше false
      */
     boolean update(SensorReading sensorReading, long id) throws IOException;

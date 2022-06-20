@@ -1,12 +1,10 @@
 package ua.lviv.iot.termPaper.services;
 
-import org.springframework.stereotype.Service;
 import ua.lviv.iot.termPaper.models.Plot;
 
 import java.io.IOException;
 import java.util.List;
 
-@Service
 public interface PlotService {
     /**
      * Створює нову ділянку.
@@ -21,7 +19,8 @@ public interface PlotService {
 
     /**
      * Повертає список всіх ділянок фермера.
-     * @param id   id діялнки яку потрібно оновити
+     *
+     * @param id id діялнки яку потрібно оновити
      * @return список ділянок
      */
     List<Plot> readAllFarmersPlots(long id);

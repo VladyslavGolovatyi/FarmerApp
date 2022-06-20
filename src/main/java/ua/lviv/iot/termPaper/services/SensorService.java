@@ -1,12 +1,10 @@
 package ua.lviv.iot.termPaper.services;
 
-import org.springframework.stereotype.Service;
 import ua.lviv.iot.termPaper.models.Sensor;
 
 import java.io.IOException;
 import java.util.List;
 
-@Service
 public interface SensorService {
     /**
      * Створює новий сенсор.
@@ -17,20 +15,23 @@ public interface SensorService {
 
     /**
      * Повертає список всіх сенсорів.
+     *
      * @return список сенсорів
      */
     List<Sensor> readAll();
 
     /**
      * Повертає сенсор з певним id.
-     * @param id   id сенсора
+     *
+     * @param id id сенсора
      * @return сенсор
      */
     Sensor read(long id);
 
     /**
      * Повертає список всіх сенсорів ділянки.
-     * @param id   id ділянки
+     *
+     * @param id id ділянки
      * @return список сенсорів
      */
     List<Sensor> readAllPlotsSensors(long id);
@@ -39,7 +40,7 @@ public interface SensorService {
      * Оновляє сенсор з заданим ID.
      *
      * @param sensor сенсор, згідно з яким потрібно оновити дані
-     * @param id   id сенсора який потрібно оновити
+     * @param id     id сенсора який потрібно оновити
      * @return true якщо дані були оновлені, інакше false
      */
     boolean update(Sensor sensor, long id) throws IOException;
