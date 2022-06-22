@@ -18,36 +18,10 @@ import java.util.stream.Collectors;
 public final class PlotServiceImpl implements PlotService {
 
     // Сховище ділянок
-    private static final Map<Long, Plot> PLOT_HASH_MAP = new HashMap<>();
+    public static final Map<Long, Plot> PLOT_HASH_MAP = new HashMap<>();
 
     // Змінна для генерації ID ділянки
     public static AtomicInteger plotIdHolder = new AtomicInteger();
-
-    public static void init() {
-        final int maxNumberOfDaysInMonth = 31;
-        for (int i = 1; i <= maxNumberOfDaysInMonth; ++i) {
-            Path path = Path.of("csvFiles/plot-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
-            if (Files.exists(path)) {
-                try (Scanner scanner = new Scanner(path)) {
-                    scanner.useDelimiter(",|\\n");
-                    scanner.nextLine();
-                    while (scanner.hasNext()) {
-                        Plot plot = new Plot();
-                        plot.setPlotId(Long.valueOf(scanner.next().replaceAll("\"", "")));
-                        if (plot.getPlotId() > plotIdHolder.get()) {
-                            plotIdHolder = new AtomicInteger(Math.toIntExact(plot.getPlotId()));
-                        }
-                        plot.setFarmerId(Long.valueOf(scanner.next().replaceAll("\"", "")));
-                        plot.setArea(Double.parseDouble(scanner.next().replaceAll("\"", "")));
-                        plot.setLocation(scanner.next().replaceAll("\"", "").replaceAll("\r",""));
-                        PLOT_HASH_MAP.put(plot.getPlotId(), plot);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
 
     @Override
     public void create(final Plot plot) throws IOException {

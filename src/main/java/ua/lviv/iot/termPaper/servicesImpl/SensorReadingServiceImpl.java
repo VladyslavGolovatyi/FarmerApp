@@ -20,36 +20,10 @@ import java.util.stream.Collectors;
 public final class SensorReadingServiceImpl implements SensorReadingService {
 
     // Сховище показів
-    private static final Map<Long, SensorReading> SENSOR_READING_HASH_MAP = new HashMap<>();
+    public static final Map<Long, SensorReading> SENSOR_READING_HASH_MAP = new HashMap<>();
 
     // Змінна для генерації ID показу
     public static AtomicInteger sensorReadingIdHolder = new AtomicInteger();
-
-    public static void init() {
-        final int maxNumberOfDaysInMonth = 31;
-        for (int i = 1; i <= maxNumberOfDaysInMonth; ++i) {
-            Path path = Path.of("csvFiles/sensorReading-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
-            if (Files.exists(path)) {
-                try (Scanner scanner = new Scanner(path)) {
-                    scanner.useDelimiter(",|\\n");
-                    scanner.nextLine();
-                    while (scanner.hasNext()) {
-                        SensorReading sensorReading = new SensorReading();
-                        sensorReading.setSensorReadingId(Long.valueOf(scanner.next().replaceAll("\"", "")));
-                        if (sensorReading.getSensorReadingId() > sensorReadingIdHolder.get()) {
-                            sensorReadingIdHolder = new AtomicInteger(Math.toIntExact(sensorReading.getSensorReadingId()));
-                        }
-                        sensorReading.setSensorId(Long.valueOf(scanner.next().replaceAll("\"", "")));
-                        sensorReading.setDateTime(LocalDateTime.parse(scanner.next().replaceAll("\"", "")));
-                        sensorReading.setReading(Double.parseDouble(scanner.next().replaceAll("\"", "")));
-                        SENSOR_READING_HASH_MAP.put(sensorReading.getSensorReadingId(), sensorReading);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
 
     @Override
     public void create(final SensorReading sensorReading) throws IOException {

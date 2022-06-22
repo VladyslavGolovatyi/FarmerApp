@@ -19,36 +19,10 @@ import java.util.stream.Collectors;
 public final class SensorServiceImpl implements SensorService {
 
     // Сховище сенсорів
-    private static final Map<Long, Sensor> SENSOR_HASH_MAP = new HashMap<>();
+    public static final Map<Long, Sensor> SENSOR_HASH_MAP = new HashMap<>();
 
     // Змінна для генерації ID сенсора
     public static AtomicInteger sensorIdHolder = new AtomicInteger();
-
-    public static void init() {
-        final int maxNumberOfDaysInMonth = 31;
-        for (int i = 1; i <= maxNumberOfDaysInMonth; ++i) {
-            Path path = Path.of("csvFiles/sensor-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
-            if (Files.exists(path)) {
-                try (Scanner scanner = new Scanner(path)) {
-                    scanner.useDelimiter(",|\\n");
-                    scanner.nextLine();
-                    while (scanner.hasNext()) {
-                        Sensor sensor = new Sensor();
-                        sensor.setSensorId(Long.valueOf(scanner.next().replaceAll("\"", "")));
-                        if (sensor.getSensorId() > sensorIdHolder.get()) {
-                            sensorIdHolder = new AtomicInteger(Math.toIntExact(sensor.getSensorId()));
-                        }
-                        sensor.setPlotId(Long.valueOf(scanner.next().replaceAll("\"", "")));
-                        sensor.setLocation(scanner.next().replaceAll("\"", "").replaceAll("\r",""));
-                        sensor.setTypeOfSensor(SensorType.valueOf(scanner.next().replaceAll("\"", "").trim()));
-                        SENSOR_HASH_MAP.put(sensor.getSensorId(), sensor);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
 
     @Override
     public void create(final Sensor sensor) throws IOException {

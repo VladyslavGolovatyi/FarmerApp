@@ -17,34 +17,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class FarmerServiceImpl implements FarmerService {
 
     // Сховище фермерів
-    private static final Map<Long, Farmer> FARMER_HASH_MAP = new HashMap<>();
+    public static final Map<Long, Farmer> FARMER_HASH_MAP = new HashMap<>();
 
     // Змінна для генерації ID фермера
     public static AtomicInteger farmerIdHolder = new AtomicInteger();
-
-    public static void init() {
-        final int maxNumberOfDaysInMonth = 31;
-        for (int i = 1; i <= maxNumberOfDaysInMonth; ++i) {
-            Path path = Path.of("csvFiles/farmer-" + LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu-MM-")) + i + ".csv");
-            if (Files.exists(path)) {
-                try (Scanner scanner = new Scanner(path)) {
-                    scanner.useDelimiter(",|\\n");
-                    scanner.nextLine();
-                    while (scanner.hasNext()) {
-                        Farmer farmer = new Farmer();
-                        farmer.setFarmerId(Long.valueOf(scanner.next().replaceAll("\"", "")));
-                        if (farmer.getFarmerId() > farmerIdHolder.get()) {
-                            farmerIdHolder = new AtomicInteger(Math.toIntExact(farmer.getFarmerId()));
-                        }
-                        farmer.setFullName(scanner.next().replaceAll("\"", "").replaceAll("\r",""));
-                        FARMER_HASH_MAP.put(farmer.getFarmerId(), farmer);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    }
 
     @Override
     public void create(final Farmer farmer) throws IOException {
