@@ -25,6 +25,7 @@ public final class SensorReadingServiceImpl implements SensorReadingService {
     // Змінна для генерації ID показу
     public static AtomicInteger sensorReadingIdHolder = new AtomicInteger();
 
+
     @Override
     public void create(final SensorReading sensorReading) throws IOException {
         final int sensorReadingId = sensorReadingIdHolder.incrementAndGet();
