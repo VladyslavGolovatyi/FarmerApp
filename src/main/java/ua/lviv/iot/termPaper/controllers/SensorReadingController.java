@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.lviv.iot.termPaper.models.SensorReading;
-import ua.lviv.iot.termPaper.services.SensorReadingService;
 import ua.lviv.iot.termPaper.servicesImpl.SensorReadingServiceImpl;
 
 import java.io.IOException;

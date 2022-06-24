@@ -1,67 +1,58 @@
 package ua.lviv.iot.termPaper.servicesImpl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.lviv.iot.termPaper.managers.CsvManager;
 import ua.lviv.iot.termPaper.models.Plot;
 import ua.lviv.iot.termPaper.services.PlotService;
+import ua.lviv.iot.termPaper.storage.PlotStorage;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public final class PlotServiceImpl implements PlotService {
 
-    // Сховище ділянок
-    public static final Map<Long, Plot> PLOT_HASH_MAP = new HashMap<>();
-
-    // Змінна для генерації ID ділянки
-    public static AtomicInteger plotIdHolder = new AtomicInteger();
+    @Autowired
+    private PlotStorage plotStorage;
 
     @Override
     public void create(final Plot plot) throws IOException {
-        final int plotId = plotIdHolder.incrementAndGet();
-        plot.setPlotId((long) plotId);
-        PLOT_HASH_MAP.put((long) plotId, plot);
-        CsvManager.writeToFile(plot.receiveHeaders(), plot.toCsv(), "plot");
+        plotStorage.addPlotToHashMap(plot);
+        plotStorage.writeToFile(plot.receiveHeaders(), plot.toCsv(), "plot");
     }
 
     @Override
     public List<Plot> readAll() {
-        return new ArrayList<>(PLOT_HASH_MAP.values());
+        return plotStorage.getAllPlots();
     }
 
     @Override
     public Plot read(final long id) {
-        return PLOT_HASH_MAP.get(id);
+        return plotStorage.getPlotById(id);
     }
 
     @Override
-    public List<Plot> readAllFarmersPlots(final long id) {
-        return PLOT_HASH_MAP.values().stream().filter(plot -> plot.getFarmerId() == id).collect(Collectors.toList());
+    public List<Plot> readAllFarmersPlots(final long farmerId) {
+        return plotStorage.getAllFarmersPlots(farmerId);
     }
 
     @Override
     public boolean update(final Plot plot, final long id) throws IOException {
-        CsvManager.deleteFromFile(id, "plot");
+        plotStorage.deleteFromFile(id, "plot");
         plot.setPlotId(id);
-        CsvManager.writeToFile(plot.receiveHeaders(), plot.toCsv(), "plot");
-        if (PLOT_HASH_MAP.containsKey(id)) {
-            PLOT_HASH_MAP.put(id, plot);
-            return true;
-        }
-
-        return false;
+        plotStorage.writeToFile(plot.receiveHeaders(), plot.toCsv(), "plot");
+        return plotStorage.updateHashMap(id, plot);
     }
 
     @Override
     public boolean delete(final long id) {
-        CsvManager.deleteFromFile(id, "plot");
-        return PLOT_HASH_MAP.remove(id) != null;
+        plotStorage.deleteFromFile(id, "plot");
+        return plotStorage.deleteFromHashMap(id);
+    }
+
+    @PostConstruct
+    private void loadPlots() {
+        plotStorage.load("plot");
     }
 }

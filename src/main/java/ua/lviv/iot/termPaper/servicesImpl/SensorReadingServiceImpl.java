@@ -1,71 +1,58 @@
 package ua.lviv.iot.termPaper.servicesImpl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.lviv.iot.termPaper.managers.CsvManager;
 import ua.lviv.iot.termPaper.models.SensorReading;
 import ua.lviv.iot.termPaper.services.SensorReadingService;
+import ua.lviv.iot.termPaper.storage.SensorReadingStorage;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public final class SensorReadingServiceImpl implements SensorReadingService {
 
-    // Сховище показів
-    public static final Map<Long, SensorReading> SENSOR_READING_HASH_MAP = new HashMap<>();
-
-    // Змінна для генерації ID показу
-    public static AtomicInteger sensorReadingIdHolder = new AtomicInteger();
-
+    @Autowired
+    private SensorReadingStorage sensorReadingStorage;
 
     @Override
     public void create(final SensorReading sensorReading) throws IOException {
-        final int sensorReadingId = sensorReadingIdHolder.incrementAndGet();
-        sensorReading.setSensorReadingId((long) sensorReadingId);
-        sensorReading.setDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-        SENSOR_READING_HASH_MAP.put((long) sensorReadingId, sensorReading);
-        CsvManager.writeToFile(sensorReading.receiveHeaders(), sensorReading.toCsv(), "sensorReading");
+        sensorReadingStorage.addSensorReadingToHashMap(sensorReading);
+        sensorReadingStorage.writeToFile(sensorReading.receiveHeaders(), sensorReading.toCsv(), "sensorReading");
     }
 
     @Override
     public List<SensorReading> readAll() {
-        return new ArrayList<>(SENSOR_READING_HASH_MAP.values());
+        return sensorReadingStorage.getAllSensorReadings();
     }
 
     @Override
     public SensorReading read(final long id) {
-        return SENSOR_READING_HASH_MAP.get(id);
+        return sensorReadingStorage.getSensorReadingById(id);
     }
 
     @Override
-    public List<SensorReading> readAllSensorsSensorReadings(final long id) {
-        return SENSOR_READING_HASH_MAP.values().stream().filter(sensorReading -> sensorReading.getSensorId() == id).collect(Collectors.toList());
+    public List<SensorReading> readAllSensorsSensorReadings(final long sensorId) {
+        return sensorReadingStorage.getAllSensorsSensorReadings(sensorId);
     }
 
     @Override
     public boolean update(final SensorReading sensorReading, final long id) throws IOException {
-        CsvManager.deleteFromFile(id, "sensorReading");
+        sensorReadingStorage.deleteFromFile(id, "sensorReading");
         sensorReading.setSensorReadingId(id);
-        CsvManager.writeToFile(sensorReading.receiveHeaders(), sensorReading.toCsv(), "sensorReading");
-        if (SENSOR_READING_HASH_MAP.containsKey(id)) {
-            SENSOR_READING_HASH_MAP.put(id, sensorReading);
-            return true;
-        }
-
-        return false;
+        sensorReadingStorage.writeToFile(sensorReading.receiveHeaders(), sensorReading.toCsv(), "sensorReading");
+        return sensorReadingStorage.updateHashMap(id, sensorReading);
     }
 
     @Override
     public boolean delete(final long id) {
-        CsvManager.deleteFromFile(id, "sensorReading");
-        return SENSOR_READING_HASH_MAP.remove(id) != null;
+        sensorReadingStorage.deleteFromFile(id, "sensorReading");
+        return sensorReadingStorage.deleteFromHashMap(id);
+    }
+
+    @PostConstruct
+    private void loadSensorReadings() {
+        sensorReadingStorage.load("sensorReading");
     }
 }
